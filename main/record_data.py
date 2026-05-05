@@ -3,7 +3,7 @@ import time
 import os
 import sys
 
-PORT = "COM4"          # my serial port
+PORT = "COM4"
 BAUD = 115200
 RECORD_SECONDS = 4.0
 OUTPUT_DIR = "gesture_data"
@@ -33,21 +33,22 @@ def record_to_file(ser, filename, duration):
                 ts = time.time()
                 f.write(f"{ts:.6f},{line}\n")
         except KeyboardInterrupt:
-            # Allow Ctrl+C to stop whole program during recording
             raise
 
 def prompt_start(prompt_text):
     """
-    Shows prompt_text and returns:
-      - 'start' to begin capture
-      - 'cancel' to skip this capture
-      - raises KeyboardInterrupt on Ctrl+C
-    To cancel, user types 'c' (or 'C') then Enter.
+    Returns:
+      - 'start' to begin capture (Enter)
+      - 'cancel' to skip current capture ('c' or 'C')
+      - 'skip_gesture' to skip entire gesture ('s' or 'S')
+    Raises KeyboardInterrupt on Ctrl+C.
     """
     try:
-        resp = input(prompt_text + " (press Enter to start, 'c'+Enter to cancel): ").strip()
+        resp = input(prompt_text + " (Enter=start, 'c'=skip capture, 's'=skip gesture): ").strip()
     except KeyboardInterrupt:
         raise
+    if resp.lower() == "s":
+        return "skip_gesture"
     if resp.lower() == "c":
         return "cancel"
     return "start"
@@ -60,9 +61,14 @@ def main():
             ser.reset_input_buffer()
 
             for gesture in GESTURES:
+                skip_rest_of_gesture = False
+
                 # initial capture saved as gesture_00.txt
                 filename_00 = os.path.join(OUTPUT_DIR, f"{gesture}_00.txt")
                 action = prompt_start(f"\nPrepare to perform '{gesture}' gesture (initial sample).")
+                if action == "skip_gesture":
+                    print(f"Skipped entire gesture '{gesture}'")
+                    continue
                 if action == "cancel":
                     print(f"Skipped {filename_00}")
                 else:
@@ -80,6 +86,10 @@ def main():
                 for i in range(1, 21):
                     fname = os.path.join(OUTPUT_DIR, f"{gesture}_{i:02d}.txt")
                     action = prompt_start(f"Prepare to perform '{gesture}' gesture #{i:02d}.")
+                    if action == "skip_gesture":
+                        print(f"Skipped remaining captures for gesture '{gesture}'")
+                        skip_rest_of_gesture = True
+                        break
                     if action == "cancel":
                         print(f"Skipped {fname}")
                         continue
@@ -92,6 +102,9 @@ def main():
                     except KeyboardInterrupt:
                         print("\nInterrupted. Exiting.")
                         return
+
+                if skip_rest_of_gesture:
+                    continue
 
     except serial.SerialException as e:
         print(f"Serial error: {e}")
