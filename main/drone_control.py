@@ -1,5 +1,8 @@
 # Example Drone Automatic Maneuvering
 
+# Place at top of gesture recognition file
+######################################################################
+
 import threading 
 import socket
 import sys
@@ -27,14 +30,6 @@ def recv():
             print ('\nExit . . .\n')
             break
 
-
-print ('\r\n\r\nTello Python3 Demo.\r\n')
-
-print ('Tello: command takeoff land flip forward back left right \r\n       up down cw ccw speed speed?\r\n')
-
-print ('end -- quit demo.\r\n')
-
-
 #recvThread create
 recvThread = threading.Thread(target=recv)
 recvThread.start()
@@ -47,6 +42,11 @@ def act(msg):
     msg = msg.encode(encoding="utf-8")
     sent = sock.sendto(msg, tello_address)
     time.sleep(5)
+
+######################################################################
+
+# After prediction: Use assigned enumeration
+######################################################################
     
 act("command")
 act("takeoff")
@@ -54,3 +54,5 @@ act("cw 360")
 act("land")
 
 sock.close()
+
+######################################################################
