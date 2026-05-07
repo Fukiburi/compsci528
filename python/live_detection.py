@@ -1,9 +1,8 @@
 from enum import Enum, auto
-import joblib
 import time
 import numpy as np
 
-from SerialReader import SerialReader
+from python.SerialReader import SerialReader
 from python.constants import WINDOW_SEC, SAMPLE_HZ
 from python.port_config import configure_port
 
@@ -11,15 +10,12 @@ ACC_THRESHOLD = 1.1
 GYRO_THRESHOLD = 50
 WINDOW_SIZE = WINDOW_SEC * SAMPLE_HZ
 
-CLASSES = ["left", "right", "up", "down"]
-
 class ReaderState(Enum):
     WAITING = auto()
     COLLECTING = auto()
 
-def detect(reader: SerialReader):
+def detect(reader: SerialReader, classes, svm_model):
     state = ReaderState.WAITING
-    svm_model = joblib.load("svm_model_pipeline.pkl")
 
     print("Please wait 2 seconds before starting.") # this guarantees we have at least a 4 second window to grab data from
     time.sleep(2)
@@ -51,11 +47,12 @@ def detect(reader: SerialReader):
 
                 # === prediction using SVM ===
                 predicted_class = svm_model.predict(sample_time_series)
-                print("Prediction: ", predicted_class, CLASSES[predicted_class[0]])
-
+                print("Prediction: ", predicted_class, classes[predicted_class[0]])
+                yield predicted_class
                 time.sleep(1) # just for prediction readability in stdout
                 print("Please enter next gesture.")
                 # display_time_domain("accelerometer", data = raw) #debug
 
-reader = configure_port()
-detect(reader)
+if __name__ == "__main__":
+    reader = configure_port()
+    detect(reader)

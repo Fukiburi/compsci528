@@ -1,7 +1,6 @@
 import time
 import os
 import joblib
-import itertools
 import numpy as np
 
 from sklearn.metrics import accuracy_score, confusion_matrix
@@ -118,8 +117,11 @@ class SVM():
 
         print(f"[INFO] SVM training took about {(time.time() - start_time):4f} seconds to train")
 
-    def evaluate(self):
-        """Evalute the model with instantiated training data. Print accuracy score and confusion matrix"""
+    def evaluate(self, accuracy_threshold=0.9, save_pipeline=False, model_file_name="svm_model.pkl"):
+        """
+        Evalute the model with instantiated training data. Print accuracy score and confusion matrix.
+        Model is saved if save_pipeline is set to true and model exceeds accuracy_threshold. 
+        """
         start_predict_time = time.time()
 
         print(self.X_test.shape)
@@ -133,6 +135,17 @@ class SVM():
         print("confusion matrix: ", confusion_matrix(self.y_test, y_pred))
         print(self.y_test)
         print(y_pred)
+
+        if accuracy < accuracy_threshold:
+            print("Model does not meet accuracy threshold, not dumping model to file.")
+        elif save_pipeline:
+            print(f"Model persistence chosen, saving model to {model_file_name}...")
+            joblib.dump(self.pipeline, model_file_name)
+            print("Model successfully saved to file.")
+        else:
+            print("Model not chosen to be stored to file, not dumping model to file.")
+
+
 
     def predict(self, raw_data):
         if self.feat_extr_method == 'PCA':
