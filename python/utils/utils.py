@@ -1,6 +1,7 @@
+"""
+Useful methods that have no other place
+"""
 import re
-import serial
-import sys
 
 # Regex that matches both raw ESP_LOGI lines and plain printed lines
 LINE_RE = re.compile(
@@ -18,14 +19,12 @@ def parse_line(line: str):
         return tuple(float(m.group(k)) for k in ("ax", "ay", "az", "gx", "gy", "gz", "t"))
     return None
 
-
-def find_port() -> str:
-    """Auto-detect the first USB-serial port."""
-    ports = serial.tools.list_ports.comports()
-    usb = [p for p in ports if "usb" in p.device.lower() or "usbserial" in p.device.lower()]
-    if usb:
-        return usb[0].device
-    if ports:
-        return ports[0].device
-    print("[ERROR] No serial ports found. Plug in your ESP32 or specify --port.", file=sys.stderr)
-    sys.exit(1)
+def read_data_from_file(file_path):
+    wave_data = []
+    with open(file_path) as file:
+        for line in file:
+            # TODO: Comment out this line when reading files with raw esp32 outputs
+            # parsed = parse_line(line)
+            # wave_data.append(parsed)
+            wave_data.append([float(num) for num in line.split(" ")])
+    return wave_data

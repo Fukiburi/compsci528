@@ -1,10 +1,9 @@
-import threading
 from collections import deque
 import time
+import threading
 import serial
-from src.ML.utils import parse_line
 
-
+from python.utils.utils import parse_line
 
 class SerialReader(threading.Thread):
     """Background thread that fills shared deques from the serial port."""

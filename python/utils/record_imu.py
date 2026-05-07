@@ -1,31 +1,12 @@
 """
-Capture imu data stream while program is running and record in a txt file.
+Capture imu data stream while record in a .txt file.
+Intended to capture training data for testing the ML model
 """
-
-import serial
-import serial.tools.list_ports
-import argparse
 import time
 
-from src.ML.SerialReader import SerialReader
-from src.ML.constants import WINDOW_SEC, SAMPLE_HZ, BAUD_RATE, DATA_PATH
-from src.ML.plot_data import display_time_domain, display_spectrogram
-from src.ML.utils import find_port
-
-def configure_port():
-    parser = argparse.ArgumentParser(description="Real-time MPU6050 recorder")
-    parser.add_argument("--port",   default=None,      help="Serial port (auto-detected if omitted)")
-    args = parser.parse_args()
-
-    port = args.port or find_port()
-
-    buf_size = int(WINDOW_SEC * SAMPLE_HZ) # sample for WINDOW_SEC seconds with SAMPLE_HZ data/sec
-
-    print(f"[INFO] Opening port {port} ")
-
-    reader = SerialReader(port, BAUD_RATE, buf_size)
-    reader.start()
-    return reader
+from python.constants import WINDOW_SEC, DATA_PATH
+from python.utils.plot_data import display_time_domain
+from python.port_config import configure_port
 
 def record_wave_data(output_file, reader):
     print(f"[INFO] Starting data collection for {WINDOW_SEC}s ...")
