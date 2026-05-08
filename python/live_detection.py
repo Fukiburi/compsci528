@@ -1,9 +1,17 @@
 from enum import Enum, auto
+from pathlib import Path
+import sys
 import time
 import numpy as np
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
+
+from python.ML.SVM import SVM
 from python.SerialReader import SerialReader
-from python.constants import WINDOW_SEC, SAMPLE_HZ
+from python.constants import ROOT, WINDOW_SEC, SAMPLE_HZ
 from python.port_config import configure_port
 
 ACC_THRESHOLD = 1.1
@@ -54,5 +62,18 @@ def detect(reader: SerialReader, classes, svm_model):
                 # display_time_domain("accelerometer", data = raw) #debug
 
 if __name__ == "__main__":
+    # python -m python.live_detection --port COM8
+    classes = ["left", "right", "forward", "land"]
+    samples_per_class = 20
     reader = configure_port()
-    detect(reader)
+
+    data_path = ROOT / "gesture_data"
+    svm_model = SVM(
+        classes, data_path,
+        feature_extraction_method='METRICS',
+        n_samples_per_class=samples_per_class,
+        source_file="svm_model.pkl"
+    )
+
+    for predicted_class in detect(reader, classes, svm_model):
+        print(predicted_class)

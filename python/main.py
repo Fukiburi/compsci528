@@ -3,13 +3,15 @@
 # Place at top of gesture recognition file
 ######################################################################
 
+from pathlib import Path
 import threading 
 import socket
 import sys
 import time
-import platform
-
-import joblib
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from python.ML.SVM import SVM
 from python.constants import ROOT
@@ -69,10 +71,12 @@ samples_per_class = 20
 reader = configure_port()
 
 data_path = ROOT / "gesture_data"
-svm_model = SVM(classes, data_path, feature_extraction_method='METRICS', n_samples_per_class=samples_per_class, source_file="svm_model.pkl")
-# svm_model.fit()
-# threshold = 0.95
-# svm_model.evaluate(accuracy_threshold=threshold, save_pipeline=True)
+svm_model = SVM(
+    classes, data_path,
+    feature_extraction_method='METRICS',
+    n_samples_per_class=samples_per_class,
+    source_file="svm_model.pkl"
+)
 
 detector = detect(reader, classes, svm_model)
 distance_cm = 80
