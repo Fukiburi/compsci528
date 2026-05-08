@@ -10,6 +10,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
 from sklearn.svm import SVC
 
+from python.constants import ROOT
 from python.utils.utils import read_data_from_file
 
 class SVM():
@@ -55,7 +56,8 @@ class SVM():
                     stratify=y,
             )
         else:
-            self.pipeline = joblib.load(source_file)
+            print("Loading saved model.")
+            self.pipeline = joblib.load(os.path.join(ROOT, source_file))
     
     def _preprocess_training_data(self):
         """transform data to reasonable format"""
@@ -117,7 +119,7 @@ class SVM():
 
         print(f"[INFO] SVM training took about {(time.time() - start_time):4f} seconds to train")
 
-    def evaluate(self, accuracy_threshold=0.9, save_pipeline=False, model_file_name="svm_model.pkl"):
+    def evaluate_save(self, accuracy_threshold=0.9, model_file_name="svm_model.pkl"):
         """
         Evalute the model with instantiated training data. Print accuracy score and confusion matrix.
         Model is saved if save_pipeline is set to true and model exceeds accuracy_threshold. 
@@ -138,13 +140,12 @@ class SVM():
 
         if accuracy < accuracy_threshold:
             print("Model does not meet accuracy threshold, not dumping model to file.")
-        elif save_pipeline:
+        elif self.source_file == None:
             print(f"Model persistence chosen, saving model to {model_file_name}...")
             joblib.dump(self.pipeline, model_file_name)
             print("Model successfully saved to file.")
         else:
             print("Model not chosen to be stored to file, not dumping model to file.")
-
 
 
     def predict(self, raw_data):

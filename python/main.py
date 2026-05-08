@@ -64,24 +64,30 @@ def demo():
 ######################################################################
 # Begin gesture prediction
 ######################################################################
-classes = ["left", "right", "up", "down"]
+classes = ["left", "right", "forward", "land"]
 samples_per_class = 20
 reader = configure_port()
 
-# get model, either pre-trained or new
-try:
-    svm_model = joblib.load("svm_model.pkl")
-except:
-    data_path = ROOT / "test_gesture_data"
-    svm_model = SVM(classes, data_path, feature_extraction_method='METRICS', n_samples_per_class=samples_per_class)
-    svm_model.fit()
-    threshold = 0.95
-    svm_model.evaluate(accuracy_threshold=threshold, save_pipeline=True)
+data_path = ROOT / "gesture_data"
+svm_model = SVM(classes, data_path, feature_extraction_method='METRICS', n_samples_per_class=samples_per_class, source_file="svm_model.pkl")
+# svm_model.fit()
+# threshold = 0.95
+# svm_model.evaluate(accuracy_threshold=threshold, save_pipeline=True)
 
 detector = detect(reader, classes, svm_model)
+distance_cm = 80
 
-for predicted_gesture in detector:
-    act(classes[predicted_gesture[0]])
+act("command")
+act("takeoff")
+
+for prediction in detector:
+    predicted_gesture = classes[prediction[0]]
+    print("Detected gesture for command: ", predicted_gesture)
+    if predicted_gesture == 'land':
+        break
+    act(f"{predicted_gesture} {distance_cm}")
+
+act("land")
 
 sock.close()
 

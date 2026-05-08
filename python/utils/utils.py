@@ -24,7 +24,9 @@ def read_data_from_file(file_path):
     with open(file_path) as file:
         for line in file:
             # TODO: Comment out this line when reading files with raw esp32 outputs
-            # parsed = parse_line(line)
-            # wave_data.append(parsed)
-            wave_data.append([float(num) for num in line.split(" ")])
+            parsed = parse_line(line)
+            if parsed == None:
+                continue
+            wave_data.append(parsed)
+            # wave_data.append([float(num) for num in line.split(" ")])
     return wave_data

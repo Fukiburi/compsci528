@@ -4,7 +4,7 @@ Intended to capture training data for testing the ML model
 """
 import time
 
-from python.constants import WINDOW_SEC, DATA_PATH
+from python.constants import WINDOW_SEC, ROOT
 from python.utils.plot_data import display_time_domain
 from python.port_config import configure_port
 
@@ -17,7 +17,7 @@ def record_wave_data(output_file, reader):
 
     t, ax_, ay_, az_, gx_, gy_, gz_, tmp = reader.snapshot()
 
-    with open(DATA_PATH + output_file + ".txt", 'w') as file:
+    with open(ROOT + "gesture_test/" + output_file, 'w') as file:
         all_data = "\n".join([" ".join([str(num) for num in line]) for line in zip(ax_, ay_, az_, gx_, gy_, gz_)]) # double join
 
         bytes_written = file.write(all_data)
@@ -32,14 +32,14 @@ def start_imu_data_collection(gesture_name):
 
 if __name__ == "__main__":
     # run python3 ./record_imu.py --port COM8
-    # start_imu_data_collection("down")
-    gesture = "right"
-    file_num_1 = 10
-    file_num_2 = 17
-    file_1 = f"{gesture}_{file_num_1}.txt"
-    file_2 = f"{gesture}_{file_num_2}.txt"
-    sensor = "Acceleration"
-    display_time_domain(file_1, sensor)
-    display_time_domain(file_2, sensor)
+    start_imu_data_collection("down")
+    # gesture = "right"
+    # file_num_1 = 10
+    # file_num_2 = 17
+    # file_1 = f"{gesture}_{file_num_1}.txt"
+    # file_2 = f"{gesture}_{file_num_2}.txt"
+    # sensor = "Acceleration"
+    # display_time_domain(file_1, sensor)
+    # display_time_domain(file_2, sensor)
     # display_spectrogram(file_1, sensor)
     # display_spectrogram(file_2, sensor)

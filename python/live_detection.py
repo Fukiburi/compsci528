@@ -25,8 +25,8 @@ def detect(reader: SerialReader, classes, svm_model):
         time.sleep(1 / SAMPLE_HZ) # match up loop to sample hz (doesn't have to be exact)
         gyro_mag = reader.mean_magnitude_gyroscope
         acc_mag = reader.mean_magnitude_accelerometer
-        # print("Gyro magnitude: ", gyro_mag) #debug
-        # print("Acc magnitude: ", acc_mag) #debug
+        print("Gyro magnitude: ", gyro_mag) #debug
+        print("Acc magnitude: ", acc_mag) #debug
         
         if state == ReaderState.WAITING:
             if gyro_mag > GYRO_THRESHOLD and acc_mag > ACC_THRESHOLD:
