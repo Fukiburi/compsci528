@@ -1,13 +1,15 @@
-import threading
 from collections import deque
+import math
 import time
+import threading
 import serial
-from src.ML.utils import parse_line
 
-
+from python.utils.utils import parse_line
 
 class SerialReader(threading.Thread):
     """Background thread that fills shared deques from the serial port."""
+    mean_magnitude_accelerometer = 0
+    mean_magnitude_gyroscope = 0
 
     def __init__(self, port: str, baud: int, buf_size: int):
         super().__init__(daemon=True)
@@ -45,6 +47,8 @@ class SerialReader(threading.Thread):
                         if parsed is None:
                             continue
                         ax, ay, az, gx, gy, gz, temp = parsed
+                        self.mean_magnitude_accelerometer = math.sqrt(ax**2 + ay**2 + az**2)
+                        self.mean_magnitude_gyroscope = math.sqrt(gx**2 + gy**2 + gz**2)
                         now = time.perf_counter() - t0
                         with self.lock:
                             self.t.append(now)

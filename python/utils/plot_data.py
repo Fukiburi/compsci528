@@ -1,7 +1,11 @@
+"""
+Utility functions that help to visualize saved waveform data.
+"""
 import matplotlib.pylab as plt
 import numpy as np
 
-from src.ML.constants import SAMPLE_HZ, DATA_PATH
+from python.constants import SAMPLE_HZ
+from python.utils.utils import read_data_from_file
 
 AXES_OPTIONS = {
         "ax_": 0,
@@ -13,16 +17,9 @@ AXES_OPTIONS = {
         "gz_": 5
     }
 
-def retrieve_wave_data(target_file):
-    wave_data = []
-    with open(DATA_PATH + target_file + ".txt") as file:
-        for line in file:
-            wave_data.append([float(num) for num in line.split(" ")])
-    return wave_data
-
 def display_time_domain(target_file, sensor):
     plt.figure()
-    raw_data = retrieve_wave_data(target_file)
+    raw_data = read_data_from_file(target_file)
     if sensor == "Gyroscope":
         legend = ["gx_", "gy_", "gz_"]
         wave_data = [line[3:] for line in raw_data]
@@ -36,14 +33,13 @@ def display_time_domain(target_file, sensor):
     plt.legend(legend)
     plt.show()
 
-
 def display_spectrogram(target_file, sensor, nfft=None):
     """
     Borrowed from lecture example
     MATLAB-like FFT magnitude plot (centered, both ± frequencies)
     """
 
-    raw_data = retrieve_wave_data(target_file)
+    raw_data = read_data_from_file(target_file)
     plt.figure()
 
     if sensor == "Acceleration":
