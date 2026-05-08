@@ -3,6 +3,13 @@ Capture imu data stream while record in a .txt file.
 Intended to capture training data for testing the ML model
 """
 import time
+from pathlib import Path
+import sys
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from python.constants import WINDOW_SEC, ROOT
 from python.utils.plot_data import display_time_domain
@@ -17,7 +24,7 @@ def record_wave_data(output_file, reader):
 
     t, ax_, ay_, az_, gx_, gy_, gz_, tmp = reader.snapshot()
 
-    with open(ROOT + "gesture_test/" + output_file, 'w') as file:
+    with open(ROOT / "extra_gestures_1/" / output_file, 'w') as file:
         all_data = "\n".join([" ".join([str(num) for num in line]) for line in zip(ax_, ay_, az_, gx_, gy_, gz_)]) # double join
 
         bytes_written = file.write(all_data)
@@ -32,7 +39,7 @@ def start_imu_data_collection(gesture_name):
 
 if __name__ == "__main__":
     # run python3 ./record_imu.py --port COM8
-    start_imu_data_collection("down")
+    start_imu_data_collection("forward")
     # gesture = "right"
     # file_num_1 = 10
     # file_num_2 = 17

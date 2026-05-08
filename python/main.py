@@ -62,6 +62,16 @@ def demo():
     act("cw 360")
     act("land")
 
+def return_to_origin(x, y, z):
+    if x > 0:
+        act(f"right {x}")
+    elif x < 0:
+        act(f"left {x}")
+    
+    if y > 0:
+        act(f"forward {y}")
+    elif y < 0:
+        act(f"back {y}")
 
 ######################################################################
 # Begin gesture prediction
@@ -80,6 +90,9 @@ svm_model = SVM(
 
 detector = detect(reader, classes, svm_model)
 distance_cm = 80
+x_traveled = 0
+y_traveled = 0
+z_traveled = 0
 
 act("command")
 act("takeoff")
@@ -87,8 +100,19 @@ act("takeoff")
 for prediction in detector:
     predicted_gesture = classes[prediction[0]]
     print("Detected gesture for command: ", predicted_gesture)
-    if predicted_gesture == 'land':
-        break
+    match predicted_gesture:
+        case "land":
+            act("land")
+        case "left":
+            x_traveled -= distance_cm
+        case "right":
+            x_traveled += distance_cm
+        case "forward":
+            y_traveled += distance_cm
+        case "back":
+            y_traveled -= distance_cm
+        case "origin":
+            return_to_origin(x_traveled, y_traveled, z_traveled)
     act(f"{predicted_gesture} {distance_cm}")
 
 act("land")
