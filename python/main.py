@@ -62,7 +62,8 @@ def demo():
     act("cw 360")
     act("land")
 
-def return_to_origin(x, y, z):
+def act_return_to_origin(x, y, z):
+    # TODO: collision detection + path correction?
     if x > 0:
         act(f"right {x}")
     elif x < 0:
@@ -73,10 +74,25 @@ def return_to_origin(x, y, z):
     elif y < 0:
         act(f"back {y}")
 
+    return 0, 0
+
+def act_sweep(sweep_range):
+    #sweep in 1 direction, move up, sweep in other direction, move up
+    sweeps = 2
+    left = True
+    for _ in range(sweeps):
+        if left:
+            act(f"left {sweep_range}")
+            left = False
+        else:
+            act(f"right {sweep_range}")
+            left = True
+        act('forward 60')
+
 ######################################################################
 # Begin gesture prediction
 ######################################################################
-classes = ["left", "right", "forward", "land"]
+classes = ["left", "right", "forward", "back", "up", "down", "ccw", "raise_hand"]
 samples_per_class = 20
 reader = configure_port()
 
@@ -93,6 +109,7 @@ distance_cm = 80
 x_traveled = 0
 y_traveled = 0
 z_traveled = 0
+sweep_range_cm = 120
 
 act("command")
 act("takeoff")
@@ -101,8 +118,9 @@ for prediction in detector:
     predicted_gesture = classes[prediction[0]]
     print("Detected gesture for command: ", predicted_gesture)
     match predicted_gesture:
-        case "land":
+        case "down":
             act("land")
+            break
         case "left":
             x_traveled -= distance_cm
         case "right":
@@ -111,8 +129,13 @@ for prediction in detector:
             y_traveled += distance_cm
         case "back":
             y_traveled -= distance_cm
-        case "origin":
-            return_to_origin(x_traveled, y_traveled, z_traveled)
+        case "up":
+            act("up 40")
+            continue
+        case "raise_hand":
+            x_traveled, y_traveled = act_return_to_origin(x_traveled, y_traveled, z_traveled)
+        case "ccw":
+            act_sweep(sweep_range_cm)
     act(f"{predicted_gesture} {distance_cm}")
 
 act("land")

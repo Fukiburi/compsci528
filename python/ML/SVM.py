@@ -1,5 +1,7 @@
 import time
 import os
+from matplotlib import pyplot as plt
+import pandas as pd
 import joblib
 import numpy as np
 
@@ -65,11 +67,11 @@ class SVM():
         # transform each row (400, 6) into matrix of (20 * 4, 400, 6)
         X_time_series = np.ndarray(shape=(self.n_training_samples, 400, 6), dtype=float)
         for index, gesture in enumerate(self.classes):
-            for sample_num in range(20):
+            for sample_num in range(self.n_samples_per_class):
                 # [gesture]_[00-19].txt
                 file_name = f'{gesture}_{sample_num:02}.txt'
                 sample_data = read_data_from_file(os.path.join(self.data_directory, file_name))
-                X_time_series[index * 20 + sample_num] = sample_data
+                X_time_series[index * self.n_samples_per_class + sample_num] = sample_data
 
         if self.feat_extr_method == "PCA":
             X_summary = self.use_pca(X_time_series, self.n_training_samples)
@@ -119,6 +121,28 @@ class SVM():
 
         print(f"[INFO] SVM training took about {(time.time() - start_time):4f} seconds to train")
 
+    def _plot_confusion_matrix(self, cm, classes, save_path="confusion_matrix.png"):
+        fig, ax = plt.subplots()
+        im = ax.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)
+        fig.colorbar(im)
+
+        ax.set_xticks(range(len(classes)))
+        ax.set_yticks(range(len(classes)))
+        ax.set_xticklabels(classes, rotation=45, ha="right")
+        ax.set_yticklabels(classes)
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("Actual")
+        ax.set_title("Confusion Matrix")
+
+        thresh = cm.max() / 2
+        for i, j in np.ndindex(cm.shape):
+            ax.text(j, i, cm[i, j], ha="center", va="center",
+                    color="white" if cm[i, j] > thresh else "black")
+
+        fig.tight_layout()
+        fig.savefig(save_path)
+        print(f"Saved to {save_path}")
+
     def evaluate_save(self, accuracy_threshold=0.9, model_file_name="svm_model.pkl"):
         """
         Evalute the model with instantiated training data. Print accuracy score and confusion matrix.
@@ -134,7 +158,9 @@ class SVM():
         print(f"[INFO] SVM training took about {(time.time() - start_predict_time):4f} seconds to train")
         print("[INFO] Accuracy score: ", accuracy)
 
-        print("confusion matrix: ", confusion_matrix(self.y_test, y_pred))
+        conf_mat = confusion_matrix(self.y_test, y_pred)
+        self._plot_confusion_matrix(conf_mat, self.classes, "conf_mat.png")
+        print("confusion matrix: ", )
         print(self.y_test)
         print(y_pred)
 

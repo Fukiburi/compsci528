@@ -63,7 +63,7 @@ def detect(reader: SerialReader, classes, svm_model):
 
 if __name__ == "__main__":
     # python -m python.live_detection --port COM8
-    classes = ["left", "right", "forward", "land"]
+    classes = ["left", "right", "forward", "back", "up", "down", "ccw", "raise_hand"]
     samples_per_class = 20
     reader = configure_port()
 

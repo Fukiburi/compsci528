@@ -24,7 +24,7 @@ def record_wave_data(output_file, reader):
 
     t, ax_, ay_, az_, gx_, gy_, gz_, tmp = reader.snapshot()
 
-    with open(ROOT / "extra_gestures_1/" / output_file, 'w') as file:
+    with open(ROOT / "gesture_data_lrud2/" / output_file, 'w') as file:
         all_data = "\n".join([" ".join([str(num) for num in line]) for line in zip(ax_, ay_, az_, gx_, gy_, gz_)]) # double join
 
         bytes_written = file.write(all_data)
@@ -32,14 +32,17 @@ def record_wave_data(output_file, reader):
 
 def start_imu_data_collection(gesture_name):
     reader = configure_port()
-    for iteration in range(20):
+    for iteration in range(20, 40):
         print("Starting iteration", iteration, "in 2 seconds...")
         time.sleep(2)
         record_wave_data(f"{gesture_name}_{iteration:02}.txt", reader)
 
 if __name__ == "__main__":
     # run python3 ./record_imu.py --port COM8
-    start_imu_data_collection("forward")
+    classes = ["back", "up", "down", "ccw", "raise_hand"]
+    for label in classes:
+        print(f"NEW: Starting collection for gesture {label}")
+        start_imu_data_collection(label)
     # gesture = "right"
     # file_num_1 = 10
     # file_num_2 = 17
